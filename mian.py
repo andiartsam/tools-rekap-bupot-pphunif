@@ -1,4 +1,5 @@
 print("Proses dimulai...")
+print("Import libraries...")
 
 import pdfplumber
 import pandas as pd
@@ -7,6 +8,7 @@ from pathlib import Path
 from tkinter import Tk, filedialog
 from tqdm import tqdm
 
+print("Membuka Jendela...")
 # ===== PATH =====
 Tk().withdraw()  # biar jendela utama tkinter nggak muncul
 
@@ -31,7 +33,8 @@ def clean_number(text):
     return int(text.replace(".", "").strip())
 
 # Hitung total PDF terlebih dahulu untuk progress bar yang akurat
-pdf_files = list(FOLDER_PDF.glob("*.pdf"))
+# rglob mencari file PDF di folder dan semua subfoldernya
+pdf_files = sorted(FOLDER_PDF.rglob("*.pdf"))
 total_files = len(pdf_files)
 
 for pdf_file in tqdm(pdf_files, desc="Memproses PDF", total=total_files):
@@ -75,10 +78,10 @@ for pdf_file in tqdm(pdf_files, desc="Memproses PDF", total=total_files):
 
         # Extract Tanggal BUPOT dan Dokumen (misal: "04 Juni 2025")
         tanggal_match = re.search(r"Jenis Dokumen.*?Tanggal\s*:\s*(.+?)(?:\n|$)", text)
-        tanggal_bupot = tanggal_match.group(1).strip() if tanggal_match else None
+        tanggal_dokumen = tanggal_match.group(1).strip() if tanggal_match else None
         
         tanggal_dok_match = re.search(r"C\.4 TANGGAL\s*:\s*(.+?)(?:\n|$)", text)
-        tanggal_dokumen = tanggal_dok_match.group(1).strip() if tanggal_dok_match else None
+        tanggal_bupot = tanggal_dok_match.group(1).strip() if tanggal_dok_match else None
 
         data.append({
             "nomor_bupot": nomor_bupot,
@@ -88,8 +91,8 @@ for pdf_file in tqdm(pdf_files, desc="Memproses PDF", total=total_files):
             "Pajak_Penghasilan": pph,
             "NPWP_Pemotong": npwp_pemotong,
             "Nama_Pemotong": nama_pemotong,
-            "Tanggal_bupot": tanggal_bupot,
-            "tanggal_dokumen": tanggal_dokumen
+            "tanggal_dokumen": tanggal_dokumen,
+            "Tanggal_bupot": tanggal_bupot
         })
 
     except Exception as e:
